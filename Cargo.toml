@@ -1,0 +1,10 @@
+[package]
+name = "ela"
+version = "0.1.0"
+authors = ["Xin Chen <xinszchen@thoughtworks.com>"]
+edition = "2018"
+
+[dependencies]
+actix-web="1.0.0-alpha.6"
+futures = "0.1.26"
+url = "1.7.2"
