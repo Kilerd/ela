@@ -1,10 +1,12 @@
 [package]
 name = "ela"
 version = "0.1.0"
+description = "high perference proxy"
 authors = ["Kilerd Chan <blove694@gmail.com>"]
 edition = "2018"
+license = "MIT"
 
 [dependencies]
-actix-web="1.0.0-alpha.6"
+actix-web = "1.0.0-alpha.6"
 futures = "0.1.26"
 url = "1.7.2"
