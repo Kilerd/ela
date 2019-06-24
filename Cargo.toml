@@ -7,6 +7,5 @@ edition = "2018"
 license = "MIT"
 
 [dependencies]
-actix-web = "1.0.0-alpha.6"
-futures = "0.1.26"
-url = "1.7.2"
+runtime = "0.3.0-alpha.5"
+futures-preview = "0.3.0-alpha.16"

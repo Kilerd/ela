@@ -1,38 +1,31 @@
-use actix_web::client::Client;
-use actix_web::{HttpServer, App, web, HttpResponse, HttpRequest, Error};
-use actix_web::middleware::Logger;
-use futures::Future;
-use url::Url;
-use futures::stream::Stream;
+#![feature(async_await)]
 
-fn forward(req: HttpRequest, payload: web::Payload, client: web::Data<Client>, target: web::Data<Url>) -> impl Future<Item=HttpResponse, Error=Error> {
-    let mut target_host = target.get_ref().clone();
-    target_host.set_path(req.uri().path());
-    target_host.set_query(req.uri().query());
+use std::future::Future;
+use runtime::net::{TcpListener, TcpStream};
+use futures::prelude::*;
+use futures::try_join;
 
-    let forwarded_req = client.request_from(target_host.as_str(), req.head());
-    forwarded_req
-        .send_stream(payload)
-        .map_err(Error::from)
-        .map(|res| {
-            let mut client_resp = HttpResponse::build(res.status());
-            for (header_name, header_value) in res.headers().iter().filter(|(h, _)| *h != "connection") {
-                client_resp.header(header_name.clone(), header_value.clone());
-            }
-            client_resp.streaming(res)
+#[runtime::main]
+async fn main() -> std::io::Result<()> {
+    let mut listener = TcpListener::bind("127.0.0.1:8081")?;
+    println!("Listening on {}", listener.local_addr()?);
+
+    listener
+        .incoming()
+        .try_for_each_concurrent(None, async move |client|{
+        runtime::spawn(async move {
+            let server = TcpStream::connect("127.0.0.1:8080").await?;
+            println!("proxy {} to {}", client.peer_addr()?, server.peer_addr()?);
+            let (cr, cw) = &mut client.split();
+            let (sr, sw) = &mut server.split();
+            let a = cr.copy_into(sw);
+            let b = sr.copy_into(cw);
+            try_join!(a, b);
+            Ok::<(), std::io::Error>(())
         })
-}
-
-fn main()-> std::io::Result<()> {
-    let forward_url = Url::parse("http://127.0.0.1:8000").unwrap();
-    HttpServer::new(move || {
-        App::new()
-            .data(Client::new())
-            .data(forward_url.clone())
-            .wrap(Logger::default())
-            .default_service(web::route().to_async(forward))
+            .await
     })
-        .bind("127.0.0.1:7777")?
-        .system_exit()
-        .run()
+        .await?;
+
+    Ok(())
 }

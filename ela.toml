@@ -1,0 +1,11 @@
+[ela]
+addr = "0.0.0.0"
+port = 7000
+
+[[sites]]
+domain = ['127.0.0.1:7001']
+root = './foo.com'
+
+[[sites]]
+domain = ['127.0.0.1:7000']
+proxy = "http://127.0.0.1:7001"
