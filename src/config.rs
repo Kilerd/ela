@@ -3,18 +3,18 @@ use std::fs::File;
 use std::io::Read;
 use std::path::Path;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Config {
     pub ela: Ela,
     pub sites: Vec<Site>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Ela {
     pub addr: String,
     pub port: u16,
 }
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Site {
     pub domain: Vec<String>,
     pub hsts: Option<bool>,

@@ -1,31 +1,16 @@
-#![feature(async_await)]
+use crate::config::Config;
+use actix_web::{web, App, HttpServer};
+use std::rc::Rc;
 
-use std::future::Future;
-use runtime::net::{TcpListener, TcpStream};
-use futures::prelude::*;
-use futures::try_join;
+mod config;
 
-#[runtime::main]
-async fn main() -> std::io::Result<()> {
-    let mut listener = TcpListener::bind("127.0.0.1:8081")?;
-    println!("Listening on {}", listener.local_addr()?);
-
-    listener
-        .incoming()
-        .try_for_each_concurrent(None, async move |client|{
-        runtime::spawn(async move {
-            let server = TcpStream::connect("127.0.0.1:8080").await?;
-            println!("proxy {} to {}", client.peer_addr()?, server.peer_addr()?);
-            let (cr, cw) = &mut client.split();
-            let (sr, sw) = &mut server.split();
-            let a = cr.copy_into(sw);
-            let b = sr.copy_into(cw);
-            try_join!(a, b);
-            Ok::<(), std::io::Error>(())
-        })
-            .await
-    })
-        .await?;
-
+fn main() -> std::io::Result<()> {
+    let config = Config::load("ela.toml");
+    let config_rc = Rc::new(config);
+    let rc = config_rc.clone();
+    HttpServer::new(move || App::new().service(web::resource("/").to(|| "hello world")))
+        .bind((rc.ela.addr.as_str(), rc.ela.port))?
+        .system_exit()
+        .run();
     Ok(())
 }
