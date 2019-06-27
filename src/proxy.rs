@@ -1,17 +1,40 @@
+use crate::config::{Config, Site};
 use actix_web::client::Client;
 use actix_web::{web, Error, HttpRequest, HttpResponse};
 use futures::Future;
+use std::sync::Arc;
 use url::Url;
 
 pub fn forward(
     req: HttpRequest,
+    config: web::Data<Arc<Config>>,
+    client: web::Data<Client>,
     payload: web::Payload,
 ) -> impl Future<Item = HttpResponse, Error = Error> {
-    let mut target_host = Url::parse("http://127.0.0.1:100").unwrap();
+    let sites: Vec<&Site> = config
+        .sites
+        .iter()
+        .filter(|&site| {
+            site.domain.eq(req
+                .headers()
+                .get("host")
+                .map(|value| value.to_str().unwrap_or(""))
+                .unwrap_or(""))
+        })
+        .collect();
+
+    let target_site = sites.get(0).expect("can not found proxy with host");
+
+    let mut target_host = target_site
+        .proxy
+        .as_ref()
+        .map(|proxy| Url::parse(proxy).expect(" cannot format as url"))
+        .expect("proxy field must be set");
+
     target_host.set_path(req.uri().path());
     target_host.set_query(req.uri().query());
 
-    let forwarded_req = Client::new().request_from(target_host.as_str(), req.head());
+    let forwarded_req = client.request_from(target_host.as_str(), req.head());
     forwarded_req
         .send_stream(payload)
         .map_err(Error::from)
