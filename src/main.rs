@@ -12,6 +12,8 @@ fn main() -> std::io::Result<()> {
     let config = Arc::new(Config::load("ela.toml"));
     let rc = config.clone();
 
+    println!("Ela is binding on {}:{}", rc.ela.addr, rc.ela.port);
+
     for site in &rc.sites {
         if let Some(proxy) = &site.proxy {
             println!("proxy {} to {}", &site.domain, proxy);
