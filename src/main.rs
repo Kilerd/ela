@@ -12,6 +12,12 @@ fn main() -> std::io::Result<()> {
     let config = Arc::new(Config::load("ela.toml"));
     let rc = config.clone();
 
+    for site in &rc.sites {
+        if let Some(proxy) = &site.proxy {
+            println!("proxy {} to {}", &site.domain, proxy);
+        }
+    }
+
     HttpServer::new(move || {
         let mut app = App::new().data(config.clone()).data(Client::new());
 
