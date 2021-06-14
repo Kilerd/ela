@@ -1,7 +1,7 @@
 use crate::config::{Config, Site};
 use actix_web::client::Client;
 use actix_web::{web, Error, HttpRequest, HttpResponse};
-use futures::Future;
+use futures::{Future, Stream};
 use std::sync::Arc;
 use url::Url;
 
