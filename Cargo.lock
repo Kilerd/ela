@@ -74,7 +74,7 @@ dependencies = [
  "hyper",
  "rustls",
  "serde_derive",
- "tokio 1.9.0",
+ "tokio 1.18.5",
  "tokio-tls",
  "toml",
  "url",
@@ -202,7 +202,7 @@ dependencies = [
  "httpdate",
  "itoa",
  "pin-project-lite 0.2.7",
- "tokio 1.9.0",
+ "tokio 1.18.5",
  "tower-service",
  "tracing",
  "want",
@@ -596,11 +596,10 @@ dependencies = [
 
 [[package]]
 name = "tokio"
-version = "1.9.0"
+version = "1.18.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4b7b349f11a7047e6d1276853e612d152f5e8a352c61917887cc2169e2366b4c"
+checksum = "0e050c618355082ae5a89ec63bbf897225d5ffe84c7c4e036874e4d185a5044e"
 dependencies = [
- "autocfg",
  "pin-project-lite 0.2.7",
 ]
 
